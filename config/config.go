@@ -51,6 +51,7 @@ type SyncConfig struct {
 	ProductFamilies  []string          `yaml:"product_families"`  // filter by product family (Mac, iPhone, iPad, etc.)
 	SetName          bool              `yaml:"set_name"`          // set asset name on create (default false)
 	FieldMapping     map[string]string `yaml:"field_mapping"`     // snipe field -> ABM attribute mapping
+	MDMOnly          bool              `yaml:"mdm_only"`          // only sync devices assigned to an MDM server
 	SupplierMapping  map[string]int    `yaml:"supplier_mapping"`  // ABM purchaseSourceId or purchaseSourceType -> snipe supplier ID
 }
 

@@ -452,6 +452,13 @@ func (e *Engine) processDevice(ctx context.Context, device abmclient.Device) err
 
 	logger := log.WithField("serial", serial)
 
+	// Skip devices not assigned to an MDM server if configured
+	if e.cfg.Sync.MDMOnly && device.AssignedServer == "" {
+		logger.Debug("Skipping device not assigned to any MDM server (mdm_only mode)")
+		e.stats.Skipped++
+		return nil
+	}
+
 	// Look up asset in Snipe-IT by serial first to decide create vs update
 	existing, err := e.snipe.GetAssetBySerial(ctx, serial)
 	if err != nil {

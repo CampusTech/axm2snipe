@@ -42,6 +42,9 @@ sync:
   # Only update existing assets, don't create new ones
   # update_only: true
 
+  # Only sync devices that are assigned to an MDM server
+  # mdm_only: true
+
   # Filter devices by product family. Leave empty to sync all.
   # Valid values: Mac, iPhone, iPad, AppleTV, Watch, Vision
   # product_families:

@@ -143,6 +143,7 @@ axm2snipe request https://mdmenrollment.apple.com/server/devices
 | `sync.force` | Same as `--force` flag |
 | `sync.rate_limit` | Enable rate limiting for API calls |
 | `sync.update_only` | Only update existing assets, never create new assets/models/suppliers |
+| `sync.mdm_only` | Only sync devices that are assigned to an MDM server |
 | `sync.product_families` | Filter devices by product family (`Mac`, `iPhone`, `iPad`, `Watch`, `Vision`) |
 | `sync.set_name` | Set asset name to "Model (Color)" on create |
 | `sync.supplier_mapping` | Map ABM/ASM supplier names to Snipe-IT supplier IDs |
