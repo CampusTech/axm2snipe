@@ -45,6 +45,9 @@ sync:
   # Only sync devices that are assigned to an MDM server
   # mdm_only: true
 
+  # Also exclude non-MDM devices from the download cache (requires mdm_only)
+  # mdm_only_cache: true
+
   # Filter devices by product family. Leave empty to sync all.
   # Valid values: Mac, iPhone, iPad, AppleTV, Watch, Vision
   # product_families:

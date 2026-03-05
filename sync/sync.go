@@ -106,6 +106,18 @@ func (e *Engine) FetchAndSaveCache(ctx context.Context) error {
 	// Filter by product family if configured
 	devices = e.filterByProductFamily(devices)
 
+	// Filter out devices not assigned to an MDM server if configured
+	if e.cfg.Sync.MDMOnly && e.cfg.Sync.MDMOnlyCache {
+		var filtered []abmclient.Device
+		for _, d := range devices {
+			if d.AssignedServer != "" {
+				filtered = append(filtered, d)
+			}
+		}
+		log.Infof("Filtered to %d devices assigned to MDM (from %d total)", len(filtered), len(devices))
+		devices = filtered
+	}
+
 	// Save devices immediately
 	if err := writeJSON(cacheDir, "devices.json", devices); err != nil {
 		return fmt.Errorf("writing devices cache: %w", err)
