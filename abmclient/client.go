@@ -169,6 +169,38 @@ func (c *Client) GetDevice(ctx context.Context, serial string) (*Device, error) 
 	return device, nil
 }
 
+// PurchaseSource represents a unique ABM purchase source.
+type PurchaseSource struct {
+	Type string // e.g. "RESELLER", "APPLE", "MANUALLY_ADDED"
+	ID   string // purchaseSourceId (may be empty)
+}
+
+// GetAllPurchaseSources fetches all devices and returns the unique purchase sources.
+func (c *Client) GetAllPurchaseSources(ctx context.Context) ([]PurchaseSource, error) {
+	devices, _, err := c.abm.FetchAllOrgDevices(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("fetching devices: %w", err)
+	}
+
+	seen := make(map[PurchaseSource]bool)
+	var sources []PurchaseSource
+	for _, d := range devices {
+		if d.Attributes == nil {
+			continue
+		}
+		srcType := string(d.Attributes.PurchaseSourceType)
+		if srcType == "" {
+			continue
+		}
+		ps := PurchaseSource{Type: srcType, ID: d.Attributes.PurchaseSourceID}
+		if !seen[ps] {
+			seen[ps] = true
+			sources = append(sources, ps)
+		}
+	}
+	return sources, nil
+}
+
 // GetAppleCareCoverage fetches AppleCare coverage for a device,
 // returning a flattened struct or nil if no coverage exists.
 func (c *Client) GetAppleCareCoverage(ctx context.Context, deviceID string) (*AppleCareCoverage, error) {

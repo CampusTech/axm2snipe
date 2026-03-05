@@ -129,5 +129,48 @@ func runSetup(cmd *cobra.Command, args []string) error {
 		}
 	}
 
+	// Fetch purchase sources from ABM and write supplier_mapping scaffold
+	log.Info("Fetching purchase sources from ABM (this fetches all devices)...")
+	purchaseSources, err := abmClient.GetAllPurchaseSources(ctx)
+	if err != nil {
+		log.Warnf("Could not fetch purchase sources: %v", err)
+	} else if len(purchaseSources) > 0 {
+		var entries []config.SupplierEntry
+		for _, ps := range purchaseSources {
+			if ps.Type == "MANUALLY_ADDED" {
+				continue // no supplier to map for manually added devices
+			}
+			if ps.ID != "" {
+				entries = append(entries, config.SupplierEntry{
+					Key:     ps.ID,
+					Comment: fmt.Sprintf("%s (id: %s)", ps.Type, ps.ID),
+				})
+			} else {
+				entries = append(entries, config.SupplierEntry{
+					Key:     ps.Type,
+					Comment: ps.Type,
+				})
+			}
+		}
+
+		if len(entries) > 0 {
+			if err := config.MergeSupplierMapping(ConfigFile, entries); err != nil {
+				log.Warnf("Could not save supplier mappings to %s: %v", ConfigFile, err)
+				fmt.Println("\nAdd these to your settings.yaml supplier_mapping manually:")
+				for _, e := range entries {
+					fmt.Printf("    # %s\n", e.Comment)
+					fmt.Printf("    %s: 0  # TODO: set Snipe-IT supplier ID\n", e.Key)
+				}
+			} else {
+				fmt.Printf("\nSupplier mapping scaffold saved to %s (set the Snipe-IT supplier IDs)\n", ConfigFile)
+			}
+
+			fmt.Println("\nPurchase sources found:")
+			for _, e := range entries {
+				fmt.Printf("  %s: %s\n", e.Key, e.Comment)
+			}
+		}
+	}
+
 	return nil
 }

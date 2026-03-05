@@ -212,6 +212,68 @@ func findOrCreateMapping(parent *yaml.Node, key string) *yaml.Node {
 	return valNode
 }
 
+// SupplierEntry represents a purchase source to write to the supplier_mapping config.
+type SupplierEntry struct {
+	Key     string // purchaseSourceId or purchaseSourceType
+	Comment string // human-readable comment (e.g. "RESELLER" or "APPLE (id: 1745703)")
+}
+
+// MergeSupplierMapping reads a YAML config file and adds commented-out
+// supplier_mapping entries for purchase sources not already mapped.
+func MergeSupplierMapping(path string, entries []SupplierEntry) error {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return fmt.Errorf("reading config file: %w", err)
+	}
+
+	var doc yaml.Node
+	if err := yaml.Unmarshal(data, &doc); err != nil {
+		return fmt.Errorf("parsing config file: %w", err)
+	}
+
+	if doc.Kind != yaml.DocumentNode || len(doc.Content) == 0 {
+		return fmt.Errorf("unexpected YAML structure")
+	}
+	root := doc.Content[0]
+	if root.Kind != yaml.MappingNode {
+		return fmt.Errorf("expected mapping at root")
+	}
+
+	syncNode := findOrCreateMapping(root, "sync")
+	smNode := findOrCreateMapping(syncNode, "supplier_mapping")
+
+	// Build set of existing keys
+	existing := make(map[string]bool)
+	for i := 0; i < len(smNode.Content)-1; i += 2 {
+		existing[smNode.Content[i].Value] = true
+	}
+
+	for _, e := range entries {
+		if e.Key == "" || existing[e.Key] {
+			continue
+		}
+		keyNode := &yaml.Node{Kind: yaml.ScalarNode, Value: e.Key, Tag: "!!str"}
+		valNode := &yaml.Node{Kind: yaml.ScalarNode, Value: "0", Tag: "!!int"}
+		if e.Comment != "" {
+			keyNode.LineComment = e.Comment
+		}
+		// Comment out the line by adding a head comment with the key
+		keyNode.HeadComment = fmt.Sprintf("TODO: set Snipe-IT supplier ID for %s", e.Comment)
+		smNode.Content = append(smNode.Content, keyNode, valNode)
+	}
+
+	out, err := yaml.Marshal(&doc)
+	if err != nil {
+		return fmt.Errorf("marshaling config: %w", err)
+	}
+
+	if err := os.WriteFile(path, out, 0644); err != nil {
+		return fmt.Errorf("writing config file: %w", err)
+	}
+
+	return nil
+}
+
 // CategoryIDForFamily returns the appropriate Snipe-IT category ID for a given
 // ABM product family (e.g. "Mac", "iPhone", "iPad"). Falls back to CategoryID.
 func (c *SnipeITConfig) CategoryIDForFamily(productFamily string) int {
