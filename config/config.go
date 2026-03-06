@@ -180,7 +180,7 @@ func MergeFieldMapping(path string, newMappings map[string]string) error {
 		return fmt.Errorf("marshaling config: %w", err)
 	}
 
-	if err := os.WriteFile(path, out, 0644); err != nil {
+	if err := os.WriteFile(path, out, 0600); err != nil {
 		return fmt.Errorf("writing config file: %w", err)
 	}
 
@@ -258,7 +258,11 @@ func MergeSupplierMapping(path string, entries []SupplierEntry) error {
 			keyNode.LineComment = e.Comment
 		}
 		// Comment out the line by adding a head comment with the key
-		keyNode.HeadComment = fmt.Sprintf("TODO: set Snipe-IT supplier ID for %s", e.Comment)
+		todoLabel := e.Comment
+		if todoLabel == "" {
+			todoLabel = e.Key
+		}
+		keyNode.HeadComment = fmt.Sprintf("TODO: set Snipe-IT supplier ID for %s", todoLabel)
 		smNode.Content = append(smNode.Content, keyNode, valNode)
 		existing[e.Key] = true
 	}
@@ -268,7 +272,7 @@ func MergeSupplierMapping(path string, entries []SupplierEntry) error {
 		return fmt.Errorf("marshaling config: %w", err)
 	}
 
-	if err := os.WriteFile(path, out, 0644); err != nil {
+	if err := os.WriteFile(path, out, 0600); err != nil {
 		return fmt.Errorf("writing config file: %w", err)
 	}
 

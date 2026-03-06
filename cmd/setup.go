@@ -156,7 +156,13 @@ func runSetup(cmd *cobra.Command, args []string) error {
 		}
 
 		if len(entries) > 0 {
-			if err := config.MergeSupplierMapping(ConfigFile, entries); err != nil {
+			if Cfg.Sync.DryRun {
+				fmt.Println("\nDRY RUN - no changes will be made. Add these to your settings.yaml supplier_mapping manually:")
+				for _, e := range entries {
+					fmt.Printf("    # %s\n", e.Comment)
+					fmt.Printf("    %s: 0  # TODO: set Snipe-IT supplier ID\n", e.Key)
+				}
+			} else if err := config.MergeSupplierMapping(ConfigFile, entries); err != nil {
 				log.Warnf("Could not save supplier mappings to %s: %v", ConfigFile, err)
 				fmt.Println("\nAdd these to your settings.yaml supplier_mapping manually:")
 				for _, e := range entries {

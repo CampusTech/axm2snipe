@@ -253,7 +253,7 @@ This will:
 2. Create AXM custom fields in Snipe-IT
 3. Associate them with your configured fieldset (`snipe_it.custom_fieldset_id`)
 4. Save the resulting field mappings to your config file under `sync.field_mapping`
-5. Scaffold `sync.supplier_mapping` entries for every purchase source found, with TODO comments to fill in Snipe-IT supplier IDs
+5. Scaffold `sync.supplier_mapping` entries for every purchase source found (excluding `MANUALLY_ADDED` sources, which require manual mapping), with TODO comments to fill in Snipe-IT supplier IDs
 
 Alternatively, create them manually:
 
