@@ -40,6 +40,8 @@ go build -o axm2snipe .
 - **Suppliers auto-created**: ABM's `PurchaseSourceType` is matched against existing Snipe-IT suppliers (case-insensitive).
 - **Snipe-IT validation errors detected**: Snipe-IT returns HTTP 200 with `{"status":"error"}` for validation failures. The upstream go-snipeit library and our wrapper both check for this.
 - **warranty_months calculated from purchase date**: `warranty_months = purchase_date → applecare_end` so Snipe-IT's auto-calculated "Warranty Expires" matches the actual coverage end date.
+- **setup scaffolds supplier_mapping**: The `setup` command connects to ABM, fetches MDM server names (used as listbox options for the Assigned MDM Server field) and all purchase sources. It writes a `supplier_mapping` scaffold to the config with TODO entries for each purchase source, so you can fill in Snipe-IT supplier IDs.
+- **Per-family category IDs**: `snipe_it.computer_category_id` is used for Mac models, `snipe_it.mobile_category_id` for iPhone/iPad/Watch/Vision. Falls back to `snipe_it.category_id`.
 
 ## Testing
 

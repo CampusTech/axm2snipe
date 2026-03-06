@@ -144,9 +144,13 @@ axm2snipe request https://mdmenrollment.apple.com/server/devices
 | `sync.rate_limit` | Enable rate limiting for API calls |
 | `sync.update_only` | Only update existing assets, never create new assets/models/suppliers |
 | `sync.product_families` | Filter devices by product family (`Mac`, `iPhone`, `iPad`, `Watch`, `Vision`) |
+| `sync.use_cache` | Same as `--use-cache` flag |
 | `sync.set_name` | Set asset name to "Model (Color)" on create |
-| `sync.supplier_mapping` | Map ABM/ASM supplier names to Snipe-IT supplier IDs |
+| `sync.supplier_mapping` | Map ABM/ASM purchase source IDs/types to Snipe-IT supplier IDs |
 | `sync.field_mapping` | Map Snipe-IT fields to ABM/AppleCare source values |
+| `snipe_it.computer_category_id` | Category ID for Mac models (overrides `category_id` for Macs) |
+| `snipe_it.mobile_category_id` | Category ID for iPhone/iPad/Watch/Vision models |
+| `snipe_it.custom_fieldset_id` | Fieldset ID to attach to auto-created models |
 | `slack.enabled` | Enable Slack webhook notifications |
 | `slack.webhook_url` | Slack incoming webhook URL |
 
@@ -245,9 +249,11 @@ axm2snipe setup -v
 ```
 
 This will:
-1. Create AXM custom fields in Snipe-IT
-2. Associate them with your configured fieldset (`snipe_it.custom_fieldset_id`)
-3. Save the resulting field mappings to your config file
+1. Connect to ABM/ASM to fetch MDM server names (used as listbox options) and all purchase sources
+2. Create AXM custom fields in Snipe-IT
+3. Associate them with your configured fieldset (`snipe_it.custom_fieldset_id`)
+4. Save the resulting field mappings to your config file under `sync.field_mapping`
+5. Scaffold `sync.supplier_mapping` entries for every purchase source found, with TODO comments to fill in Snipe-IT supplier IDs
 
 Alternatively, create them manually:
 
