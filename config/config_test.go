@@ -3,10 +3,31 @@ package config
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
+// clearAXMEnv unsets all AXM_* environment variables and returns a restore function.
+func clearAXMEnv(t *testing.T) func() {
+	t.Helper()
+	saved := map[string]string{}
+	for _, kv := range os.Environ() {
+		if strings.HasPrefix(kv, "AXM_") {
+			k := strings.SplitN(kv, "=", 2)[0]
+			saved[k] = os.Getenv(k)
+			os.Unsetenv(k)
+		}
+	}
+	return func() {
+		for k, v := range saved {
+			os.Setenv(k, v)
+		}
+	}
+}
+
 func TestLoad_ValidConfig(t *testing.T) {
+	restore := clearAXMEnv(t)
+	defer restore()
 	content := `
 abm:
   client_id: "BUSINESSAPI.test-id"

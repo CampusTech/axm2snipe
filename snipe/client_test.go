@@ -3,6 +3,7 @@ package snipe
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -41,7 +42,7 @@ func TestNewClient_TrimTrailingSlash(t *testing.T) {
 func TestCreateModel_DryRun(t *testing.T) {
 	c := &Client{DryRun: true}
 	_, err := c.CreateModel(context.Background(), snipeit.Model{})
-	if err != ErrDryRun {
+	if !errors.Is(err, ErrDryRun) {
 		t.Errorf("expected ErrDryRun, got %v", err)
 	}
 }
@@ -49,7 +50,7 @@ func TestCreateModel_DryRun(t *testing.T) {
 func TestCreateSupplier_DryRun(t *testing.T) {
 	c := &Client{DryRun: true}
 	_, err := c.CreateSupplier(context.Background(), "Test Supplier")
-	if err != ErrDryRun {
+	if !errors.Is(err, ErrDryRun) {
 		t.Errorf("expected ErrDryRun, got %v", err)
 	}
 }
@@ -57,7 +58,7 @@ func TestCreateSupplier_DryRun(t *testing.T) {
 func TestCreateAsset_DryRun(t *testing.T) {
 	c := &Client{DryRun: true}
 	_, err := c.CreateAsset(context.Background(), snipeit.Asset{})
-	if err != ErrDryRun {
+	if !errors.Is(err, ErrDryRun) {
 		t.Errorf("expected ErrDryRun, got %v", err)
 	}
 }
@@ -65,7 +66,7 @@ func TestCreateAsset_DryRun(t *testing.T) {
 func TestPatchAsset_DryRun(t *testing.T) {
 	c := &Client{DryRun: true}
 	_, err := c.PatchAsset(context.Background(), 1, snipeit.Asset{})
-	if err != ErrDryRun {
+	if !errors.Is(err, ErrDryRun) {
 		t.Errorf("expected ErrDryRun, got %v", err)
 	}
 }
@@ -93,7 +94,10 @@ func TestGetAssetBySerial(t *testing.T) {
 		t.Fatal(err)
 	}
 	if resp.Total != 1 {
-		t.Errorf("expected 1 result, got %d", resp.Total)
+		t.Fatalf("expected 1 result, got %d", resp.Total)
+	}
+	if len(resp.Rows) == 0 {
+		t.Fatal("expected at least 1 row")
 	}
 	if resp.Rows[0].ID != 42 {
 		t.Errorf("expected asset ID 42, got %d", resp.Rows[0].ID)
