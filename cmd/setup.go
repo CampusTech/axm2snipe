@@ -79,6 +79,7 @@ func runSetup(cmd *cobra.Command, args []string) error {
 		{Name: "AXM: AppleCare Start Date", Element: "text", Format: "DATE", HelpText: "AppleCare coverage start date"},
 		{Name: "AXM: AppleCare Status", Element: "radio", Format: "ANY", HelpText: "AppleCare coverage status", FieldValues: "Active\nInactive\nExpired"},
 		mdmServerField,
+		{Name: "AXM: Part Number", Element: "text", Format: "ANY", HelpText: "Apple part number (e.g. MW0Y3LL/A)"},
 		{Name: "AXM: Released from Org", Element: "text", Format: "DATE", HelpText: "Date device was released from ABM/ASM organization"},
 	}
 
@@ -99,6 +100,7 @@ func runSetup(cmd *cobra.Command, args []string) error {
 		"AXM: AppleCare Renewable":    "applecare_renewable",
 		"AXM: AppleCare Payment Type": "applecare_payment_type",
 		"AXM: Assigned MDM Server":    "assigned_server",
+		"AXM: Part Number":            "part_number",
 	}
 
 	// Build field mapping: DB column -> ABM attribute
