@@ -116,6 +116,8 @@ func (e *Engine) FetchAndSaveCache(ctx context.Context) error {
 		}
 		log.Infof("Filtered to %d devices assigned to MDM (from %d total)", len(filtered), len(devices))
 		devices = filtered
+	} else if e.cfg.Sync.MDMOnlyCache && !e.cfg.Sync.MDMOnly {
+		log.Warn("sync.mdm_only_cache is enabled but sync.mdm_only is false; cache filtering will be skipped")
 	}
 
 	// Save devices immediately
