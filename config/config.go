@@ -260,6 +260,7 @@ func MergeSupplierMapping(path string, entries []SupplierEntry) error {
 		// Comment out the line by adding a head comment with the key
 		keyNode.HeadComment = fmt.Sprintf("TODO: set Snipe-IT supplier ID for %s", e.Comment)
 		smNode.Content = append(smNode.Content, keyNode, valNode)
+		existing[e.Key] = true
 	}
 
 	out, err := yaml.Marshal(&doc)
