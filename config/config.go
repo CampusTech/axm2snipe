@@ -248,6 +248,7 @@ func MergeSupplierMapping(path string, entries []SupplierEntry) error {
 		existing[smNode.Content[i].Value] = true
 	}
 
+	changed := false
 	for _, e := range entries {
 		if e.Key == "" || existing[e.Key] {
 			continue
@@ -257,7 +258,7 @@ func MergeSupplierMapping(path string, entries []SupplierEntry) error {
 		if e.Comment != "" {
 			keyNode.LineComment = e.Comment
 		}
-		// Comment out the line by adding a head comment with the key
+		// Add a TODO head comment above the generated mapping entry.
 		todoLabel := e.Comment
 		if todoLabel == "" {
 			todoLabel = e.Key
@@ -265,6 +266,11 @@ func MergeSupplierMapping(path string, entries []SupplierEntry) error {
 		keyNode.HeadComment = fmt.Sprintf("TODO: set Snipe-IT supplier ID for %s", todoLabel)
 		smNode.Content = append(smNode.Content, keyNode, valNode)
 		existing[e.Key] = true
+		changed = true
+	}
+
+	if !changed {
+		return nil
 	}
 
 	out, err := yaml.Marshal(&doc)
