@@ -127,7 +127,9 @@ func (c *Client) GetAllDevices(ctx context.Context) ([]Device, int, error) {
 	// Build device ID → server name map
 	deviceToServer, err := c.BuildDeviceServerMap(ctx)
 	if err != nil {
-		// Non-fatal: continue without server names
+		// Non-fatal: continue without server names, but warn since mdm_only filtering
+		// will treat all devices as unassigned if this fails.
+		log.WithError(err).Warn("Could not build device-server map; AssignedServer will be empty for all devices (mdm_only filtering may incorrectly skip managed devices)")
 		deviceToServer = make(map[string]string)
 	}
 

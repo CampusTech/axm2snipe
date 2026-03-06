@@ -468,7 +468,7 @@ func (e *Engine) processDevice(ctx context.Context, device abmclient.Device) err
 
 	// Skip devices not assigned to an MDM server if configured
 	if e.cfg.Sync.MDMOnly && device.AssignedServer == "" {
-		logger.Debug("Skipping device not assigned to any MDM server (mdm_only mode)")
+		logger.Info("Skipping device not assigned to any MDM server (mdm_only mode)")
 		e.stats.Skipped++
 		return nil
 	}
