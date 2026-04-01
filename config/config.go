@@ -82,19 +82,25 @@ func Load(path string) (*Config, error) {
 	}
 
 	// Environment variable overrides
-	if v := os.Getenv("AXM_ABM_CLIENT_ID"); v != "" {
+	if v := strings.TrimSpace(os.Getenv("AXM_ABM_CLIENT_ID")); v != "" {
 		cfg.ABM.ClientID = v
 	}
-	if v := os.Getenv("AXM_ABM_KEY_ID"); v != "" {
+	if v := strings.TrimSpace(os.Getenv("AXM_ABM_KEY_ID")); v != "" {
 		cfg.ABM.KeyID = v
 	}
 	if v := os.Getenv("AXM_ABM_PRIVATE_KEY"); v != "" {
 		cfg.ABM.PrivateKey = v
 	}
-	if v := os.Getenv("AXM_SNIPE_URL"); v != "" {
+	if v := strings.TrimSpace(os.Getenv("AXM_ABM_OAUTH_SCOPE")); v != "" {
+		cfg.ABM.OAuthScope = v
+	}
+	if v := strings.TrimSpace(os.Getenv("AXM_ABM_API_BASE_URL")); v != "" {
+		cfg.ABM.APIBaseURL = v
+	}
+	if v := strings.TrimSpace(os.Getenv("AXM_SNIPE_URL")); v != "" {
 		cfg.SnipeIT.URL = v
 	}
-	if v := os.Getenv("AXM_SNIPE_API_KEY"); v != "" {
+	if v := strings.TrimSpace(os.Getenv("AXM_SNIPE_API_KEY")); v != "" {
 		cfg.SnipeIT.APIKey = v
 	}
 
