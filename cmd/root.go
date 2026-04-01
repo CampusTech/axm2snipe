@@ -9,8 +9,10 @@ import (
 	"strings"
 	"syscall"
 
+	"github.com/CampusTech/abm"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"golang.org/x/oauth2"
 
 	"github.com/CampusTech/axm2snipe/abmclient"
 	"github.com/CampusTech/axm2snipe/config"
@@ -184,12 +186,40 @@ func contextWithSignal() (context.Context, context.CancelFunc) {
 
 // newABMClient creates and returns a new ABM client from global config.
 func newABMClient(ctx context.Context) (*abmclient.Client, error) {
-	log.Info("Connecting to Apple Business Manager...")
-	client, err := abmclient.NewClient(ctx, Cfg.ABM.ClientID, Cfg.ABM.KeyID, Cfg.ABM.PrivateKeyValue())
+	log.Infof("Connecting to Apple %s Manager...", appleManagerName())
+	client, err := abmclient.NewClient(
+		ctx,
+		Cfg.ABM.ClientID,
+		Cfg.ABM.KeyID,
+		Cfg.ABM.PrivateKeyValue(),
+		Cfg.ABM.OAuthScopeValue(),
+		Cfg.ABM.APIBaseURLValue(),
+	)
 	if err != nil {
 		return nil, fmt.Errorf("creating ABM client: %w", err)
 	}
 	return client, nil
+}
+
+func newABMTokenSource(ctx context.Context) (oauth2.TokenSource, error) {
+	assertion, err := abm.NewAssertion(ctx, Cfg.ABM.ClientID, Cfg.ABM.KeyID, Cfg.ABM.PrivateKeyValue())
+	if err != nil {
+		return nil, fmt.Errorf("creating ABM assertion: %w", err)
+	}
+
+	ts, err := abm.NewTokenSource(ctx, nil, Cfg.ABM.ClientID, assertion, Cfg.ABM.OAuthScopeValue())
+	if err != nil {
+		return nil, fmt.Errorf("creating ABM token source: %w", err)
+	}
+
+	return ts, nil
+}
+
+func appleManagerName() string {
+	if Cfg != nil && Cfg.ABM.IsSchoolManager() {
+		return "School"
+	}
+	return "Business"
 }
 
 // newSnipeClient creates and returns a new Snipe-IT client from global config.

@@ -35,20 +35,20 @@ type Client struct {
 	abm *abm.Client
 }
 
-// NewClient creates a new ABM client using the abm library for auth.
+// NewClient creates a new ABM/ASM client using the abm library for auth.
 // Rate limiting and retry logic are handled by the upstream abm library.
-func NewClient(ctx context.Context, clientID, keyID, privateKey string) (*Client, error) {
+func NewClient(ctx context.Context, clientID, keyID, privateKey, scope, baseURL string) (*Client, error) {
 	assertion, err := abm.NewAssertion(ctx, clientID, keyID, privateKey)
 	if err != nil {
 		return nil, fmt.Errorf("creating ABM assertion: %w", err)
 	}
 
-	ts, err := abm.NewTokenSource(ctx, nil, clientID, assertion, "")
+	ts, err := abm.NewTokenSource(ctx, nil, clientID, assertion, scope)
 	if err != nil {
 		return nil, fmt.Errorf("creating ABM token source: %w", err)
 	}
 
-	client, err := abm.NewClient(nil, ts)
+	client, err := abm.NewClientWithBaseURL(nil, ts, baseURL)
 	if err != nil {
 		return nil, fmt.Errorf("creating ABM client: %w", err)
 	}

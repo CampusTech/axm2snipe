@@ -213,6 +213,53 @@ func TestValidateABM_MissingPrivateKey(t *testing.T) {
 	}
 }
 
+func TestABMConfig_AutoDetectsScopeAndBaseURL(t *testing.T) {
+	tests := []struct {
+		name     string
+		cfg      ABMConfig
+		want     string
+		wantBase string
+	}{
+		{
+			name: "school",
+			cfg: ABMConfig{
+				ClientID: "SCHOOLAPI.test-id",
+			},
+			want:     SchoolAPIScope,
+			wantBase: SchoolAPIBaseURL,
+		},
+		{
+			name: "business",
+			cfg: ABMConfig{
+				ClientID: "BUSINESSAPI.test-id",
+			},
+			want:     BusinessAPIScope,
+			wantBase: BusinessAPIBaseURL,
+		},
+		{
+			name: "override",
+			cfg: ABMConfig{
+				ClientID:   "SCHOOLAPI.test-id",
+				OAuthScope: "custom.scope",
+				APIBaseURL: "https://example.invalid/",
+			},
+			want:     "custom.scope",
+			wantBase: "https://example.invalid/",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.cfg.OAuthScopeValue(); got != tt.want {
+				t.Fatalf("OAuthScopeValue() = %q, want %q", got, tt.want)
+			}
+			if got := tt.cfg.APIBaseURLValue(); got != tt.wantBase {
+				t.Fatalf("APIBaseURLValue() = %q, want %q", got, tt.wantBase)
+			}
+		})
+	}
+}
+
 func TestValidateSnipeIT_MissingURL(t *testing.T) {
 	cfg := &Config{SnipeIT: SnipeITConfig{APIKey: "test", ManufacturerID: 1, DefaultStatusID: 1, CategoryID: 1}}
 	if err := cfg.ValidateSnipeIT(); err == nil {

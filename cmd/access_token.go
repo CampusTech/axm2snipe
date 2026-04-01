@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/CampusTech/abm"
 )
 
 // NewAccessTokenCmd creates the access-token command.
@@ -25,14 +24,9 @@ func runAccessToken(cmd *cobra.Command, args []string) error {
 
 	ctx := context.Background()
 
-	assertion, err := abm.NewAssertion(ctx, Cfg.ABM.ClientID, Cfg.ABM.KeyID, Cfg.ABM.PrivateKeyValue())
+	ts, err := newABMTokenSource(ctx)
 	if err != nil {
-		return fmt.Errorf("creating ABM assertion: %w", err)
-	}
-
-	ts, err := abm.NewTokenSource(ctx, nil, Cfg.ABM.ClientID, assertion, "")
-	if err != nil {
-		return fmt.Errorf("creating ABM token source: %w", err)
+		return err
 	}
 
 	token, err := ts.Token()

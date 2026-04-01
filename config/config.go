@@ -35,7 +35,9 @@ type SlackConfig struct {
 type ABMConfig struct {
 	ClientID   string `yaml:"client_id"`
 	KeyID      string `yaml:"key_id"`
-	PrivateKey string `yaml:"private_key"` // path to PEM file or raw PEM string
+	PrivateKey string `yaml:"private_key"`  // path to PEM file or raw PEM string
+	OAuthScope string `yaml:"oauth_scope"`  // optional explicit override; auto-detected from client_id when empty
+	APIBaseURL string `yaml:"api_base_url"` // optional explicit override; auto-detected from client_id when empty
 }
 
 // SnipeITConfig holds Snipe-IT API settings.
@@ -129,6 +131,44 @@ func (c *ABMConfig) PrivateKeyValue() string {
 	return "-----BEGIN EC PRIVATE KEY-----\n" + key + "\n-----END EC PRIVATE KEY-----\n"
 }
 
+const (
+	BusinessAPIClientPrefix = "BUSINESSAPI."
+	SchoolAPIClientPrefix   = "SCHOOLAPI."
+	BusinessAPIScope        = "business.api"
+	SchoolAPIScope          = "school.api"
+	BusinessAPIBaseURL      = "https://api-business.apple.com/"
+	SchoolAPIBaseURL        = "https://api-school.apple.com/"
+)
+
+// IsSchoolManager reports whether the configured client ID belongs to ASM.
+func (c *ABMConfig) IsSchoolManager() bool {
+	return strings.HasPrefix(strings.TrimSpace(c.ClientID), SchoolAPIClientPrefix)
+}
+
+// OAuthScopeValue returns the configured OAuth scope, auto-detecting a default
+// from the client ID prefix when not explicitly set.
+func (c *ABMConfig) OAuthScopeValue() string {
+	if v := strings.TrimSpace(c.OAuthScope); v != "" {
+		return v
+	}
+	if c.IsSchoolManager() {
+		return SchoolAPIScope
+	}
+	return BusinessAPIScope
+}
+
+// APIBaseURLValue returns the configured API base URL, auto-detecting a
+// default from the client ID prefix when not explicitly set.
+func (c *ABMConfig) APIBaseURLValue() string {
+	if v := strings.TrimSpace(c.APIBaseURL); v != "" {
+		return v
+	}
+	if c.IsSchoolManager() {
+		return SchoolAPIBaseURL
+	}
+	return BusinessAPIBaseURL
+}
+
 // ValidateABM checks that ABM credentials are set.
 func (c *Config) ValidateABM() error {
 	if c.ABM.ClientID == "" {
@@ -139,6 +179,12 @@ func (c *Config) ValidateABM() error {
 	}
 	if c.ABM.PrivateKey == "" {
 		return fmt.Errorf("abm.private_key is required (file path, inline PEM, or bare base64)")
+	}
+	if strings.TrimSpace(c.ABM.OAuthScopeValue()) == "" {
+		return fmt.Errorf("abm.oauth_scope could not be determined")
+	}
+	if strings.TrimSpace(c.ABM.APIBaseURLValue()) == "" {
+		return fmt.Errorf("abm.api_base_url could not be determined")
 	}
 	return nil
 }

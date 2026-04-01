@@ -85,6 +85,13 @@ cp settings.example.yaml settings.yaml
 
 See [settings.example.yaml](settings.example.yaml) for all options and documentation.
 
+`abm.client_id` now drives the Apple API defaults automatically:
+
+- `BUSINESSAPI.*` uses `business.api` with `https://api-business.apple.com/`
+- `SCHOOLAPI.*` uses `school.api` with `https://api-school.apple.com/`
+
+If Apple changes those requirements, you can override them with `abm.oauth_scope` and `abm.api_base_url`.
+
 ## Usage
 
 ```bash
@@ -124,11 +131,11 @@ axm2snipe sync -v --log-file /var/log/axm2snipe.log
 # JSON logs to file
 axm2snipe sync -v --log-format json --log-file /var/log/axm2snipe.log
 
-# Print an ABM access token (useful for manual API testing with curl)
+# Print an ABM/ASM access token (useful for manual API testing with curl)
 axm2snipe access-token
 
-# Make an authenticated ABM API request
-axm2snipe request https://mdmenrollment.apple.com/server/devices
+# Make an authenticated ABM/ASM API request
+axm2snipe request https://api-school.apple.com/v1/orgDevices
 ```
 
 ### Commands
@@ -139,8 +146,8 @@ axm2snipe request https://mdmenrollment.apple.com/server/devices
 | `download` | Download ABM/ASM data to local cache |
 | `setup` | Create AXM custom fields in Snipe-IT and save mappings to config |
 | `test` | Test connections to ABM/ASM and Snipe-IT |
-| `access-token` | Print an ABM API access token |
-| `request <url>` | Make an authenticated ABM API GET request |
+| `access-token` | Print an ABM/ASM API access token |
+| `request <url>` | Make an authenticated ABM/ASM API GET request |
 
 ### Global Flags
 
