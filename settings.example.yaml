@@ -17,6 +17,12 @@ abm:
   #   3. Bare base64 (the key body without PEM headers — useful for env vars):
   # private_key: "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQg..."
   # AXM_ABM_PRIVATE_KEY accepts all three formats as well.
+  # OAuth scope and API base URL are auto-detected from client_id:
+  #   BUSINESSAPI.* -> business.api + https://api-business.apple.com/
+  #   SCHOOLAPI.*   -> school.api   + https://api-school.apple.com/
+  # Optional explicit overrides:
+  # oauth_scope: "school.api"
+  # api_base_url: "https://api-school.apple.com/"
 
 snipe_it:
   # Snipe-IT instance URL (no trailing slash)

@@ -139,6 +139,8 @@ snipe_it:
 	}
 
 	t.Setenv("AXM_ABM_CLIENT_ID", "env-client-id")
+	t.Setenv("AXM_ABM_OAUTH_SCOPE", "env.scope")
+	t.Setenv("AXM_ABM_API_BASE_URL", "https://env.example.invalid/")
 	t.Setenv("AXM_SNIPE_URL", "https://env.example.com")
 
 	cfg, err := Load(path)
@@ -148,6 +150,12 @@ snipe_it:
 
 	if cfg.ABM.ClientID != "env-client-id" {
 		t.Errorf("env override ABM.ClientID = %q, want env-client-id", cfg.ABM.ClientID)
+	}
+	if cfg.ABM.OAuthScope != "env.scope" {
+		t.Errorf("env override ABM.OAuthScope = %q, want env.scope", cfg.ABM.OAuthScope)
+	}
+	if cfg.ABM.APIBaseURL != "https://env.example.invalid/" {
+		t.Errorf("env override ABM.APIBaseURL = %q", cfg.ABM.APIBaseURL)
 	}
 	if cfg.SnipeIT.URL != "https://env.example.com" {
 		t.Errorf("env override SnipeIT.URL = %q", cfg.SnipeIT.URL)
@@ -210,6 +218,61 @@ func TestValidateABM_MissingPrivateKey(t *testing.T) {
 	cfg := &Config{ABM: ABMConfig{ClientID: "test", KeyID: "test"}}
 	if err := cfg.ValidateABM(); err == nil {
 		t.Error("expected error for missing private_key")
+	}
+}
+
+func TestABMConfig_AutoDetectsScopeAndBaseURL(t *testing.T) {
+	tests := []struct {
+		name     string
+		cfg      ABMConfig
+		want     string
+		wantBase string
+	}{
+		{
+			name: "school",
+			cfg: ABMConfig{
+				ClientID: "SCHOOLAPI.test-id",
+			},
+			want:     SchoolAPIScope,
+			wantBase: SchoolAPIBaseURL,
+		},
+		{
+			name: "business",
+			cfg: ABMConfig{
+				ClientID: "BUSINESSAPI.test-id",
+			},
+			want:     BusinessAPIScope,
+			wantBase: BusinessAPIBaseURL,
+		},
+		{
+			name: "unknown prefix defaults to business",
+			cfg: ABMConfig{
+				ClientID: "UNKNOWN.test-id",
+			},
+			want:     BusinessAPIScope,
+			wantBase: BusinessAPIBaseURL,
+		},
+		{
+			name: "override",
+			cfg: ABMConfig{
+				ClientID:   "SCHOOLAPI.test-id",
+				OAuthScope: "custom.scope",
+				APIBaseURL: "https://example.invalid/",
+			},
+			want:     "custom.scope",
+			wantBase: "https://example.invalid/",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.cfg.OAuthScopeValue(); got != tt.want {
+				t.Fatalf("OAuthScopeValue() = %q, want %q", got, tt.want)
+			}
+			if got := tt.cfg.APIBaseURLValue(); got != tt.wantBase {
+				t.Fatalf("APIBaseURLValue() = %q, want %q", got, tt.wantBase)
+			}
+		})
 	}
 }
 

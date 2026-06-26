@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	"github.com/spf13/cobra"
-	"github.com/CampusTech/abm"
 	"golang.org/x/oauth2"
 )
 
@@ -29,14 +28,9 @@ func runRequest(cmd *cobra.Command, args []string) error {
 
 	ctx := context.Background()
 
-	assertion, err := abm.NewAssertion(ctx, Cfg.ABM.ClientID, Cfg.ABM.KeyID, Cfg.ABM.PrivateKeyValue())
+	ts, err := newABMTokenSource(ctx)
 	if err != nil {
-		return fmt.Errorf("creating ABM assertion: %w", err)
-	}
-
-	ts, err := abm.NewTokenSource(ctx, nil, Cfg.ABM.ClientID, assertion, "")
-	if err != nil {
-		return fmt.Errorf("creating ABM token source: %w", err)
+		return err
 	}
 
 	client := oauth2.NewClient(ctx, ts)
